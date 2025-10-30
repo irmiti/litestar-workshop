@@ -4,6 +4,8 @@ from litestar import Controller, get
 from litestar.params import Parameter
 from litestar.exceptions import PermissionDeniedException
 
+from guards import api_key_guard
+
 
 VALID_TOKEN = "super-secret-secret"
 VALID_COOKIE_VALUE = "cookie-secret"
@@ -42,11 +44,11 @@ class ParamDemoController(Controller):
             "list": strings,
         }
 
-    @get(path="/header-cookies/{user_id:int}/")
+    @get(path="/header-cookies/{user_id:int}/", guards=[api_key_guard])
     async def get_user(
             self,
             user_id: int,
-            token: Annotated[str, Parameter(header="X-API-KEY")],
+            token: Annotated[str, Parameter(header="X-API-KEY", required=False)],
             # cookie: Annotated[str, Parameter(cookie="my-cookie-param")],  Does not work in Swagger UI
     ) -> dict[str, str]:
         if token != VALID_TOKEN:
