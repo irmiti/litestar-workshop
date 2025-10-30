@@ -1,4 +1,5 @@
 from litestar import Litestar, get, Request
+from litestar.contrib.opentelemetry import OpenTelemetryConfig, OpenTelemetryPlugin
 from litestar.exceptions import ValidationException
 from litestar.di import Provide
 from litestar.logging import LoggingConfig
@@ -40,4 +41,5 @@ app = Litestar(
     },
     logging_config=logging_config,
     dependencies={"app_config": Provide(lambda: "Litestar demo app")},
+    plugins=[OpenTelemetryPlugin(OpenTelemetryConfig())]
 )
