@@ -1,5 +1,6 @@
 from litestar import Litestar, get, Request
 from litestar.exceptions import ValidationException
+from litestar.di import Provide
 from litestar.logging import LoggingConfig
 from litestar.status_codes import HTTP_500_INTERNAL_SERVER_ERROR
 
@@ -16,6 +17,11 @@ async def index(request: Request) -> str:
     return "Hello, Litestar!"
 
 
+@get("/di-demo", dependencies={"app_config": Provide(lambda: "Another name")})
+async def di_demo(app_config: str) -> str:
+    return f"I am {app_config}"
+
+
 logging_config = LoggingConfig(
     root={"level": "INFO", "handlers": ["queue_listener"]},
     formatters={
@@ -26,11 +32,12 @@ logging_config = LoggingConfig(
 
 
 app = Litestar(
-    route_handlers=[index, ParamDemoController, UserController, ErrorDemoController, CacheDemoController],
+    route_handlers=[index, di_demo, ParamDemoController, UserController, ErrorDemoController, CacheDemoController],
     exception_handlers={
         ValueError: error_handler.value_error_handler,
         ValidationException: error_handler.validation_exception_handler,
         HTTP_500_INTERNAL_SERVER_ERROR: error_handler.internal_server_error_handler,
     },
     logging_config=logging_config,
+    dependencies={"app_config": Provide(lambda: "Litestar demo app")},
 )
