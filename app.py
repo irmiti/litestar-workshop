@@ -6,6 +6,7 @@ from litestar.status_codes import HTTP_500_INTERNAL_SERVER_ERROR
 from controllers.param_demo import ParamDemoController
 from controllers.user import UserController
 from controllers.error_demo import ErrorDemoController
+from controllers.cache_demo import CacheDemoController
 import error_handler
 
 
@@ -25,7 +26,7 @@ logging_config = LoggingConfig(
 
 
 app = Litestar(
-    route_handlers=[index, ParamDemoController, UserController, ErrorDemoController],
+    route_handlers=[index, ParamDemoController, UserController, ErrorDemoController, CacheDemoController],
     exception_handlers={
         ValueError: error_handler.value_error_handler,
         ValidationException: error_handler.validation_exception_handler,
