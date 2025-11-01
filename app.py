@@ -4,6 +4,7 @@ from litestar.exceptions import ValidationException
 from litestar.di import Provide
 from litestar.logging import LoggingConfig
 from litestar.status_codes import HTTP_500_INTERNAL_SERVER_ERROR
+from litestar.types import ASGIApp, Scope, Receive, Send
 
 from controllers.param_demo import ParamDemoController
 from controllers.user import UserController
@@ -21,6 +22,15 @@ async def index(request: Request) -> str:
 @get("/di-demo", dependencies={"app_config": Provide(lambda: "Another name")})
 async def di_demo(app_config: str) -> str:
     return f"I am {app_config}"
+
+
+def middleware_factory(app: ASGIApp) -> ASGIApp:
+    async def my_middleware(scope: Scope, receive: Receive, send: Send) -> None:
+        print("Avant")
+        await app(scope, receive, send)
+        print("Après")
+
+    return my_middleware
 
 
 logging_config = LoggingConfig(
@@ -41,5 +51,6 @@ app = Litestar(
     },
     logging_config=logging_config,
     dependencies={"app_config": Provide(lambda: "Litestar demo app")},
-    plugins=[OpenTelemetryPlugin(OpenTelemetryConfig())]
+    plugins=[OpenTelemetryPlugin(OpenTelemetryConfig())],
+    middleware=[middleware_factory],
 )
